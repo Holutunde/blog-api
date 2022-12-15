@@ -4,7 +4,7 @@ const fileUpload = require('express-fileupload')
 
 const { parseData } = require('../middleware/parseData')
 
-const { createPost } = require('../controllers/post')
+const { createPost, deletePost } = require('../controllers/post')
 
 // const multer = require('../middleware/multer')
 const { postValidator, validate } = require('../middleware/postValidator')
@@ -18,5 +18,6 @@ router
     validate,
     createPost,
   )
+router.route('/:id').delete(deletePost)
 
 module.exports = router

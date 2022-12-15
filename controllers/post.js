@@ -1,5 +1,6 @@
 const Post = require('../models/postSchema')
 const FeaturedPost = require('../models/featuredSchema')
+const { isValidObjectId } = require('mongoose')
 // Require the cloudinary library
 const cloudinary = require('cloudinary').v2
 
@@ -35,7 +36,7 @@ exports.createPost = async (req, res, next) => {
   const newPost = new Post({ title, meta, content, slug, author, tags })
 
   if (thumbnail) {
-    const { secure_url, public_id } = await21cloudinary.uploader.upload(
+    const { secure_url, public_id } = await cloudinary.uploader.upload(
       thumbnail.tempFilePath,
     )
 
@@ -55,4 +56,22 @@ exports.createPost = async (req, res, next) => {
       author: newPost.author,
     },
   })
+}
+exports.deletePost = async (req, res, next) => {
+  const id = req.params.id
+  if (!isValidObjectId(id))
+    return res.status(401).json({ error: 'Invalid request' })
+
+  const post = await Post.findById(id)
+  if (!post) return res.status(404).json({ error: 'Post not found' })
+
+  const public_id = post.thumbnail?.public_id
+  if (public_id) {
+    const { result } = await cloudinary.uploader.destroy(public_id)
+    if (result !== 'ok')
+      return res.status(404).json({ error: 'Could not remove thumbnail' })
+  }
+
+  await Post.findByIdAndDelete(id)
+  return res.status(200).json({ error: 'Post removed successfully' })
 }
