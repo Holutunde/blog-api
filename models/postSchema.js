@@ -21,17 +21,17 @@ const postSchema = mongoose.Schema(
     author: {
       type: String,
       default: 'Admin',
-      ref: 'Auth',
+      // ref: 'Auth',
     },
     slug: {
       type: String,
       required: true,
       trim: true,
-      unique: true,
+      //unique: true,
     },
     thumbnail: {
       type: Object,
-      url: {
+      secure_url: {
         type: URL,
         required: true,
       },

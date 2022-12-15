@@ -1,7 +1,6 @@
 require('dotenv').config()
 require('express-async-errors')
 // Note: You MUST import the package in some way for tracing to work
-const fileUpload = require('express-fileupload')
 
 const express = require('express')
 const app = express()
@@ -12,7 +11,6 @@ const notFound = require('./middleware/notFound')
 const post = require('./routes/post')
 
 app.use(morgan('dev'))
-app.use(fileUpload())
 
 const port = process.env.PORT || 4000
 
