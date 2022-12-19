@@ -10,6 +10,7 @@ const {
   updatePost,
   getPost,
   getFeaturedPost,
+  getLatestPosts,
 } = require('../controllers/post')
 
 // const multer = require('../middleware/multer')
@@ -44,7 +45,8 @@ router
   )
 router.route('/:id').delete(deletePost)
 
-router.route('/single/:id').get(getPost)
+router.route('/single/:slug').get(getPost)
 router.route('/featured').get(getFeaturedPost)
+router.route('/latestpost').get(getLatestPosts)
 
 module.exports = router

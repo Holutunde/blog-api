@@ -14,9 +14,7 @@ cloudinary.config({
 const removeFeaturedPosts = async (postID) => {
   if (!isValidObjectId(postID))
     return res.status(401).json({ error: 'Invalid request' })
-
-  const post = postID
-  await FeaturedPost.findByIdAndDelete({ post })
+  await FeaturedPost.findOneAndDelete({ post: postID })
 }
 const addToFeaturedPosts = async (postID) => {
   const featuredPost = new FeaturedPost({ post: postID })
@@ -92,16 +90,15 @@ exports.deletePost = async (req, res, next) => {
   return res.status(200).json('Post removed successfully')
 }
 exports.getPost = async (req, res) => {
-  const id = req.params.id
-  if (!isValidObjectId(id))
-    return res.status(401).json({ error: 'Invalid request' })
+  const { slug } = req.params
+  if (!slug) return res.status(401).json({ error: 'Invalid request' })
 
-  const post = await Post.findById(id)
+  const post = await Post.findOne({ slug })
   if (!post) return res.status(404).json({ error: 'Post not found' })
 
   const featured = await isFeaturedPost(post._id)
 
-  const { title, meta, content, slug, author, tags } = post
+  const { title, meta, content, author, tags } = post
   res.json({
     post: {
       id: post._id,
@@ -222,3 +219,4 @@ exports.getFeaturedPost = async (req, res) => {
     featuredPosts,
   })
 }
+exports.getLatestPosts = async (req, res) => {}
