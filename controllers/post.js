@@ -30,6 +30,7 @@ const isFeaturedPost = async (postID) => {
   return post ? true : false
 }
 
+//create Post
 exports.createPost = async (req, res, next) => {
   const { title, meta, content, slug, author, tags, featured } = req.body
 
@@ -68,6 +69,7 @@ exports.createPost = async (req, res, next) => {
   })
 }
 
+//delete Post
 exports.deletePost = async (req, res, next) => {
   const { id } = req.params
 
@@ -114,6 +116,7 @@ exports.getPost = async (req, res) => {
   })
 }
 
+//update Post
 exports.updatePost = async (req, res, next) => {
   const { title, meta, content, slug, author, tags, featured } = req.body
 
@@ -169,54 +172,79 @@ exports.updatePost = async (req, res, next) => {
   })
 }
 
-exports.createPost = async (req, res, next) => {
-  const { title, meta, content, slug, author, tags, featured } = req.body
-
-  const thumbnail = req.files?.thumbnail
-
-  console.log(thumbnail)
-
-  const isSlugExisting = await Post.findOne({ slug })
-
-  if (isSlugExisting) {
-    return res.status(401).json({ error: 'use unique slug' })
-  }
-
-  const newPost = new Post({ title, meta, content, slug, author, tags })
-
-  if (thumbnail) {
-    const { secure_url, public_id } = await cloudinary.uploader.upload(
-      thumbnail.tempFilePath,
-    )
-
-    newPost.thumbnail = { secure_url, public_id }
-  }
-  await newPost.save()
-
-  if (featured) await addToFeaturedPosts(newPost._id)
-  res.json({
-    post: {
-      id: newPost._id,
-      title,
-      meta,
-      slug,
-      content,
-      thumbnail: newPost.thumbnail?.secure_url,
-      author: newPost.author,
-    },
-  })
-}
-
 exports.getFeaturedPost = async (req, res) => {
   const featuredPosts = await FeaturedPost.find({})
-    .sort({ createdAt: -1 })
+    .sort({ createdAdt: -1 })
     .limit(4)
     .populate({
       path: 'post',
-      // select: ['_id', 'title', 'meta', 'slug', 'content', 'author'],
+      select: ['_id', 'title', 'meta', 'slug', 'content', 'author'],
     })
-  res.json({
+  res.status(200).json({
     featuredPosts,
   })
 }
-exports.getLatestPosts = async (req, res) => {}
+exports.getLatestPosts = async (req, res) => {
+  const { pageNo, limit } = req.query
+  const posts = await Post.find({})
+    .sort({ createdAt: -1 })
+    .skip(parseInt(pageNo) * parseInt(limit))
+
+  res.status(200).json({ posts })
+}
+exports.getAllPosts = async (req, res) => {
+  const post = await Post.find({})
+  if (!post) return res.status(404).json({ error: 'Post not found' })
+
+  res.status(200).json({ post })
+}
+
+exports.search = async (req, res) => {
+  const { title } = req.query
+
+  if (!title.trim()) {
+    return res.status(401).json({ error: 'search query is missing' })
+  }
+
+  const posts = await Post.find({ title: { $regex: title, $options: 'i' } })
+
+  res.status(200).json({
+    posts: posts.map((post) => ({
+      id: post._id,
+      title: post.title,
+      meta: post.meta,
+      slug: post.slug,
+      thumbnail: post.thumbnail?.secure_url,
+      author: post.author,
+    })),
+  })
+}
+
+exports.relatedPost = async (req, res) => {
+  const { id } = req.params
+
+  if (!isValidObjectId(id))
+    return res.status(401).json({ error: 'Invalid request' })
+
+  const post = await Post.findById(id)
+  if (!post) return res.status(404).json({ error: 'Post not found' })
+
+  const relatedPosts = await Post.find({
+    tags: { $in: [...post.tags] },
+    _id: { $ne: post._id },
+  })
+    .sort({ createdAt: -1 })
+    .limit(5)
+
+  res.status(200).json({
+    posts: relatedPosts.map((post) => ({
+      id: post._id,
+      title: post.title,
+      tags: post.tags,
+      meta: post.meta,
+      slug: post.slug,
+      thumbnail: post.thumbnail?.secure_url,
+      author: post.author,
+    })),
+  })
+}
