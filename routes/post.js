@@ -14,9 +14,9 @@ const {
   getAllPosts,
   search,
   relatedPost,
+  uploadImage,
 } = require('../controllers/post')
 
-// const multer = require('../middleware/multer')
 const { postValidator, validate } = require('../middleware/postValidator')
 
 router
@@ -38,6 +38,9 @@ router
     updatePost,
   )
 router
+  .route('/singleupload')
+  .post(fileUpload({ useTempFiles: true }), uploadImage)
+router
   .route('/:id')
   .put(
     fileUpload({ useTempFiles: true }),
@@ -53,5 +56,6 @@ router.route('/featured').get(getFeaturedPost)
 router.route('/latestpost').get(getLatestPosts)
 router.route('/search').get(search)
 router.route('/relatedposts/:id').get(relatedPost)
+router.route('/singleupload').post(uploadImage)
 
 module.exports = router
