@@ -140,11 +140,6 @@ exports.updatePost = async (req, res, next) => {
     )
 
     post.thumbnail = { secure_url, public_id }
-    post.title = title
-    post.meta = meta
-    post.content = content
-    post.author = author
-    post.tags = tags
   }
 
   if (public_id) {
@@ -152,6 +147,11 @@ exports.updatePost = async (req, res, next) => {
     if (result !== 'ok')
       return res.status(404).json({ error: 'Could not remove thumbnail' })
   }
+  // post.title = title
+  // post.meta = meta
+  // post.content = content
+  // post.author = author
+  // post.tags = tags
 
   if (featured) {
     await addToFeaturedPosts(post._id)
@@ -202,6 +202,7 @@ exports.getLatestPosts = async (req, res) => {
   const posts = await Post.find({})
     .sort({ createdAt: -1 })
     .skip(parseInt(pageNo) * parseInt(limit))
+    .limit(limit)
 
   res.status(200).json({
     posts: posts.map((post) => ({
