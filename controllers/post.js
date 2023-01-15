@@ -91,6 +91,8 @@ exports.deletePost = async (req, res, next) => {
   await removeFeaturedPosts(post._id)
   return res.status(200).json('Post removed successfully')
 }
+
+//get Post
 exports.getPost = async (req, res) => {
   const { slug } = req.params
   if (!slug) return res.status(401).json({ error: 'Invalid request' })
@@ -172,18 +174,29 @@ exports.updatePost = async (req, res, next) => {
   })
 }
 
+//get Featured Post
 exports.getFeaturedPost = async (req, res) => {
   const featuredPosts = await FeaturedPost.find({})
     .sort({ createdAdt: -1 })
     .limit(4)
     .populate({
       path: 'post',
-      select: ['_id', 'title', 'meta', 'slug', 'content', 'author'],
     })
+
+  console.log(featuredPosts)
   res.status(200).json({
-    featuredPosts,
+    posts: featuredPosts.map((post) => ({
+      id: post._id,
+      title: post.post.title,
+      meta: post.post.meta,
+      slug: post.post.slug,
+      thumbnail: post.post.thumbnail?.secure_url,
+      author: post.post.author,
+    })),
   })
 }
+
+//get Latest Post
 exports.getLatestPosts = async (req, res) => {
   const { pageNo, limit } = req.query
   const posts = await Post.find({})
@@ -192,6 +205,8 @@ exports.getLatestPosts = async (req, res) => {
 
   res.status(200).json({ posts })
 }
+
+//get All Posts
 exports.getAllPosts = async (req, res) => {
   const post = await Post.find({})
   if (!post) return res.status(404).json({ error: 'Post not found' })
@@ -199,6 +214,7 @@ exports.getAllPosts = async (req, res) => {
   res.status(200).json({ post })
 }
 
+//get Search
 exports.search = async (req, res) => {
   const { title } = req.query
 
@@ -220,6 +236,7 @@ exports.search = async (req, res) => {
   })
 }
 
+//get Related Post
 exports.relatedPost = async (req, res) => {
   const { id } = req.params
 
@@ -247,4 +264,16 @@ exports.relatedPost = async (req, res) => {
       author: post.author,
     })),
   })
+}
+
+//upload Image
+exports.uploadImage = async (req, res) => {
+  const file = req.files?.file
+  if (!file) {
+    return res.status(401).json({ error: 'Image file is missing!' })
+  }
+  if (file) {
+    const { secure_url } = await cloudinary.uploader.upload(file.tempFilePath)
+    res.status(201).json({ image: secure_url })
+  }
 }
