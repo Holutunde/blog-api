@@ -202,7 +202,9 @@ exports.getLatestPosts = async (req, res) => {
   const posts = await Post.find({})
     .sort({ createdAt: -1 })
     .skip(parseInt(pageNo) * parseInt(limit))
-    .limit(limit)
+    .limit(parseInt(limit))
+
+  const postCount = await Post.countDocuments()
 
   res.status(200).json({
     posts: posts.map((post) => ({
@@ -213,6 +215,7 @@ exports.getLatestPosts = async (req, res) => {
       thumbnail: post.thumbnail?.secure_url,
       author: post.author,
     })),
+    postCount,
   })
 }
 
