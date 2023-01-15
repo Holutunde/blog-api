@@ -181,10 +181,18 @@ exports.getFeaturedPost = async (req, res) => {
     .limit(4)
     .populate({
       path: 'post',
-      select: ['_id', 'title', 'meta', 'slug', 'content', 'author'],
     })
+
+  console.log(featuredPosts)
   res.status(200).json({
-    featuredPosts,
+    posts: featuredPosts.map((post) => ({
+      id: post._id,
+      title: post.post.title,
+      meta: post.post.meta,
+      slug: post.post.slug,
+      thumbnail: post.post.thumbnail?.secure_url,
+      author: post.post.author,
+    })),
   })
 }
 
