@@ -97,21 +97,21 @@ exports.getPost = async (req, res) => {
   const { slug } = req.params
   if (!slug) return res.status(401).json({ error: 'Invalid request' })
 
-  const post = await Post.findOne({ slug })
-  //if (!post) return res.status(404).json({ error: 'Post not found' })
+  const postdetail = await Post.findOne({ slug })
+  if (!postdetail) return res.status(404).json({ error: 'Post not found' })
 
-  const featured = await isFeaturedPost(post._id)
+  const featured = await isFeaturedPost(postdetail._id)
 
-  const { title, meta, content, author, tags } = post
+  const { title, meta, content, author, tags } = postdetail
   res.json({
-    postdetail: {
-      id: post._id,
+    post: {
+      id: postdetail._id,
       title,
       meta,
       slug,
       content,
       tags,
-      thumbnail: post.thumbnail?.secure_url,
+      thumbnail: postdetail.thumbnail?.secure_url,
       author,
       featured,
     },
