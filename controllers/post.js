@@ -104,7 +104,7 @@ exports.getPost = async (req, res) => {
 
   const { title, meta, content, author, tags } = post
   res.json({
-    post: {
+    postdetail: {
       id: post._id,
       title,
       meta,
