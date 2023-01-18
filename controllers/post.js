@@ -1,5 +1,5 @@
-const Post = require('../models/postSchema')
 const FeaturedPost = require('../models/featuredSchema')
+const Post = require('../models/postSchema')
 const { isValidObjectId } = require('mongoose')
 // Require the cloudinary library
 const cloudinary = require('cloudinary').v2
@@ -92,7 +92,7 @@ exports.deletePost = async (req, res, next) => {
   return res.status(200).json('Post removed successfully')
 }
 
-//get Post
+//get Post by slug
 exports.getPost = async (req, res) => {
   const { slug } = req.params
   if (!slug) return res.status(401).json({ error: 'Invalid request' })
@@ -114,6 +114,33 @@ exports.getPost = async (req, res) => {
       thumbnail: postdetail.thumbnail?.secure_url,
       author,
       featured,
+    },
+  })
+}
+//get Post by id
+exports.getPostId = async (req, res) => {
+  const id = req.params.id
+  console.log(id)
+  if (!isValidObjectId(id))
+    return res.status(401).json({ error: 'Invalid request' })
+
+  const post = await Post.findById(id)
+  if (!post) return res.status(404).json({ error: 'Post not found' })
+
+  const featured = await isFeaturedPost(post._id)
+
+  const { title, meta, content, author, tags, createdAt } = post
+  res.json({
+    post: {
+      id: post._id,
+      title,
+      meta,
+      content,
+      tags,
+      thumbnail: post.thumbnail?.secure_url,
+      author,
+      featured,
+      createdAt,
     },
   })
 }
