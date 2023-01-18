@@ -98,7 +98,7 @@ exports.getPost = async (req, res) => {
   if (!slug) return res.status(401).json({ error: 'Invalid request' })
 
   const post = await Post.findOne({ slug })
-  if (!post) return res.status(404).json({ error: 'Post not found' })
+  //if (!post) return res.status(404).json({ error: 'Post not found' })
 
   const featured = await isFeaturedPost(post._id)
 
