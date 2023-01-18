@@ -15,6 +15,7 @@ const {
   search,
   relatedPost,
   uploadImage,
+  getPostId,
 } = require('../controllers/post')
 
 const { postValidator, validate } = require('../middleware/postValidator')
@@ -52,6 +53,7 @@ router
 router.route('/:id').delete(deletePost)
 router.route('/getallpost').get(getAllPosts)
 router.route('/single/:slug').get(getPost)
+router.route('/detail/:id').get(getPostId)
 router.route('/featured').get(getFeaturedPost)
 router.route('/latestpost').get(getLatestPosts)
 router.route('/search').get(search)
